@@ -1,12 +1,13 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 #define PORT 3000
 
 int main() {
 	int socket_fd;
-	int recv_fd;
+	int client_fd;
 	int opt = 1;
 	struct sockaddr_in socket_addr;
 	socklen_t addrlen;
@@ -36,10 +37,9 @@ int main() {
 	}
 	printf("socket listening on http://127.0.0.1:%d\n", PORT);
 
-	if ((recv_fd = accept(socket_fd, (struct sockaddr *)&socket_addr,
-						  &addrlen)) < 0) {
-		perror("failed to accept connect from client");
-		return -1;
+	while ((client_fd = accept(socket_fd, (struct sockaddr *)&socket_addr,
+							   &addrlen)) > 0) {
+		close(client_fd);
 	}
 
 	return 0;
