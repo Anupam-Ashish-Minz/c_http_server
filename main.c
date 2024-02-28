@@ -7,6 +7,18 @@
 
 #define PORT 3000
 
+int digits(int n) {
+	if (n == 0) {
+		return 1;
+	}
+	int count = 0;
+	while (n != 0) {
+		n = n / 10;
+		++count;
+	}
+	return count;
+}
+
 int main() {
 	int socket_fd;
 	int client_fd;
@@ -14,14 +26,14 @@ int main() {
 	struct sockaddr_in socket_addr;
 	socklen_t addrlen;
 	const char *content = "hello world";
-	int content_len = strlen(content);
-	char *http_format = "HTTP/1.1 200 OK\n\r"
-						"Content-Type: text/html;\r\n"
+	int content_len = strlen(content) + 3;
+	char *http_format = "HTTP/1.1 200 OK\r\n"
+						"Content-Type: text/plain\r\n"
 						"Connection: close\r\n"
 						"Content-Length: %d\r\n"
-						"\r\n %s\r\n\r\n";
+						"\r\n %s\r\n";
 	char *http_msg =
-		(char *)malloc(strlen(http_format) + content_len + sizeof(content_len));
+		(char *)malloc(strlen(http_format) + content_len + digits(content_len));
 
 	socket_addr.sin_addr.s_addr = INADDR_ANY;
 	socket_addr.sin_family = AF_INET;
@@ -52,7 +64,6 @@ int main() {
 							   &addrlen)) > 0) {
 		sprintf(http_msg, http_format, content_len, content);
 		send(client_fd, http_msg, strlen(http_msg), 0);
-		close(client_fd);
 	}
 
 	return 0;
