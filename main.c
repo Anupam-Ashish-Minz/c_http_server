@@ -1,5 +1,7 @@
 #include <netinet/in.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -11,6 +13,15 @@ int main() {
 	int opt = 1;
 	struct sockaddr_in socket_addr;
 	socklen_t addrlen;
+	const char *content = "hello world";
+	int content_len = strlen(content);
+	char *http_format = "HTTP/1.1 200 OK\n\r"
+						"Content-Type: text/html;\r\n"
+						"Connection: close\r\n"
+						"Content-Length: %d\r\n"
+						"\r\n %s\r\n\r\n";
+	char *http_msg =
+		(char *)malloc(strlen(http_format) + content_len + sizeof(content_len));
 
 	socket_addr.sin_addr.s_addr = INADDR_ANY;
 	socket_addr.sin_family = AF_INET;
@@ -39,6 +50,8 @@ int main() {
 
 	while ((client_fd = accept(socket_fd, (struct sockaddr *)&socket_addr,
 							   &addrlen)) > 0) {
+		sprintf(http_msg, http_format, content_len, content);
+		send(client_fd, http_msg, strlen(http_msg), 0);
 		close(client_fd);
 	}
 
