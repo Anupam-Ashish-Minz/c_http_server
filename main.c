@@ -26,7 +26,8 @@ int digits(int n) {
 	return count;
 }
 
-void request_handler(int client_fd) {
+void *request_handler(void *vargp) {
+	int client_fd = *(int *)vargp;
 	const char *content = "fixed message from server";
 	int content_len = strlen(content) + 3;
 	char *http_msg =
@@ -46,6 +47,8 @@ void request_handler(int client_fd) {
 	printf("\n");
 
 	write(client_fd, http_msg, strlen(http_msg));
+
+	return 0;
 }
 
 int main() {
@@ -80,9 +83,11 @@ int main() {
 	}
 	printf("socket listening on http://127.0.0.1:%d\n", PORT);
 
+	pthread_t thread;
 	while ((client_fd = accept(socket_fd, (struct sockaddr *)&socket_addr,
 							   &addrlen)) > 0) {
-		request_handler(client_fd);
+		pthread_create(&thread, NULL, &request_handler, (void *)&client_fd);
+		// request_handler(client_fd);
 	}
 
 	return 0;
