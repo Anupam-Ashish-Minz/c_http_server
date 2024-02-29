@@ -47,6 +47,7 @@ void *request_handler(void *vargp) {
 	printf("\n");
 
 	write(client_fd, http_msg, strlen(http_msg));
+	close(client_fd);
 
 	return 0;
 }
