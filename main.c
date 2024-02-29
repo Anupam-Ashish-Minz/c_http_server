@@ -25,7 +25,7 @@ int main() {
 	int opt = 1;
 	struct sockaddr_in socket_addr;
 	socklen_t addrlen;
-	const char *content = "hello world";
+	const char *content = "fixed message from server";
 	int content_len = strlen(content) + 3;
 	char *http_format = "HTTP/1.1 200 OK\r\n"
 						"Content-Type: text/plain\r\n"
@@ -63,7 +63,7 @@ int main() {
 	while ((client_fd = accept(socket_fd, (struct sockaddr *)&socket_addr,
 							   &addrlen)) > 0) {
 		sprintf(http_msg, http_format, content_len, content);
-		send(client_fd, http_msg, strlen(http_msg), 0);
+		write(client_fd, http_msg, strlen(http_msg));
 	}
 
 	return 0;
