@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #define PORT 3000
+#define READ_BUF_SIZE 1024
 
 int digits(int n) {
 	if (n == 0) {
@@ -60,9 +61,21 @@ int main() {
 	}
 	printf("socket listening on http://127.0.0.1:%d\n", PORT);
 
+	char buf[READ_BUF_SIZE];
+	unsigned int read_len;
 	while ((client_fd = accept(socket_fd, (struct sockaddr *)&socket_addr,
 							   &addrlen)) > 0) {
 		sprintf(http_msg, http_format, content_len, content);
+
+		do {
+			read_len = read(client_fd, buf, READ_BUF_SIZE);
+			if (read_len < READ_BUF_SIZE) {
+				buf[read_len] = '\0';
+			}
+			printf("%s", buf);
+		} while (read_len == READ_BUF_SIZE);
+		printf("\n");
+
 		write(client_fd, http_msg, strlen(http_msg));
 	}
 
