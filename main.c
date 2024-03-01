@@ -26,6 +26,10 @@ int digits(int n) {
 	return count;
 }
 
+void parse_http_request(char *http_request, ssize_t len) {
+	printf("%s\n", http_request);
+}
+
 void *request_handler(void *vargp) {
 	int client_fd = *(int *)vargp;
 	const char *content = "fixed message from server";
@@ -37,14 +41,13 @@ void *request_handler(void *vargp) {
 
 	sprintf(http_msg, http_format, content_len, content);
 
+	char *http_request = (char *)malloc(sizeof(char) * READ_BUF_SIZE);
 	do {
 		read_len = read(client_fd, buf, READ_BUF_SIZE);
-		if (read_len < READ_BUF_SIZE) {
-			buf[read_len] = '\0';
-		}
-		printf("%s", buf);
+		strncpy(http_request, buf, read_len);
 	} while (read_len == READ_BUF_SIZE);
-	printf("\n");
+	// printf("%s\n", http_request);
+	parse_http_request(http_request, strlen(http_request));
 
 	write(client_fd, http_msg, strlen(http_msg));
 	close(client_fd);
