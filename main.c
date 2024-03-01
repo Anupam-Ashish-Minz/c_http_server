@@ -27,12 +27,26 @@ int digits(int n) {
 }
 
 void parse_http_request(char *http_request, ssize_t len) {
-	printf("%s\n", http_request);
+	int split_at = -1;
+	for (int i = 0; i < len; i++) {
+		if (http_request[i] == ' ') {
+			split_at = i;
+			break;
+		}
+	}
+	char *http_method = (char *)malloc(split_at + 1);
+	strncpy(http_method, http_request, split_at);
+	printf("http method is : %s\n", http_method);
+	if (strlen(http_method) == 3 && strncmp(http_method, "GET", 3)) {
+		// get_request_handler();
+	} else if (strlen(http_method) == 4 && strncmp(http_method, "POST", 4)) {
+		// post_request_handler();
+	}
 }
 
 void *request_handler(void *vargp) {
 	int client_fd = *(int *)vargp;
-	const char *content = "fixed message from server";
+	const char *content = "previous message";
 	int content_len = strlen(content) + 3;
 	char *http_msg =
 		(char *)malloc(strlen(http_format) + content_len + digits(content_len));
@@ -72,8 +86,7 @@ int main() {
 		perror("failed to init socket");
 		return -1;
 	}
-	setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt,
-			   sizeof(opt));
+	setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 	if (bind(socket_fd, (struct sockaddr *)&socket_addr, sizeof(socket_addr)) <
 		0) {
 		perror("failed to bind socket");
@@ -87,11 +100,16 @@ int main() {
 	}
 	printf("socket listening on http://127.0.0.1:%d\n", PORT);
 
-	pthread_t thread;
-	while ((client_fd = accept(socket_fd, (struct sockaddr *)&socket_addr,
-							   &addrlen)) > 0) {
-		pthread_create(&thread, NULL, &request_handler, (void *)&client_fd);
-		// request_handler(client_fd);
+	// assume max concurrent requsets
+	pthread_t threads[100];
+	int count = 0;
+	while (1) {
+		client_fd =
+			accept(socket_fd, (struct sockaddr *)&socket_addr, &addrlen);
+		// TODO check for thread limits later
+		pthread_create(&threads[count++ % 100], NULL, &request_handler,
+					   (void *)&client_fd);
+		// pthread_join(threads[count % 100], NULL);
 	}
 
 	return 0;
