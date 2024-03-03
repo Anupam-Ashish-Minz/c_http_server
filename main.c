@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 #define PORT 3000
-#define READ_BUF_SIZE 1024
+#define READ_BUF_SIZE 65535 // as 64K is the max size of tcp packet
 
 const char *http_format = "HTTP/1.1 200 OK\r\n"
 						  "Content-Type: text/plain\r\n"
