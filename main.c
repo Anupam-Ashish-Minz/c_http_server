@@ -26,16 +26,21 @@ int digits(int n) {
 	return count;
 }
 
-void parse_http_request(char *http_request, ssize_t len) {
-	int split_at = -1;
+void parse_http_request(char *http_request, size_t len) {
+	int prev_split = 0;
+	char **splits = (char **)malloc(100);
+	int split_index = 0;
+
 	for (int i = 0; i < len; i++) {
 		if (http_request[i] == ' ') {
-			split_at = i;
-			break;
+			splits[split_index] = (char *)malloc(i + 1);
+			strncpy(splits[split_index], &http_request[prev_split], i);
+			split_index++;
+			prev_split = i + 1;
 		}
 	}
-	char *http_method = (char *)malloc(split_at + 1);
-	strncpy(http_method, http_request, split_at);
+	char *http_method;
+	http_method = splits[0];
 	printf("http method is : %s\n", http_method);
 	if (strlen(http_method) == 3 && strncmp(http_method, "GET", 3)) {
 		// get_request_handler();
